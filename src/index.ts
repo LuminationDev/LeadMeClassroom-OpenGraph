@@ -37,14 +37,18 @@ export const fetchPreviewImage = functions.https.onRequest((request, response) =
       if (!result.ogImage ||
         result.ogImage.length < 1 ||
         !result.ogImage[0].url) {
-        response.status(400);
-        response.send();
-        return;
-      }
-      if (result.ogImage[0].type !== 'image/jpeg') {
-        response.status(400);
-        response.send();
-        return;
+
+        bucket.upload('./src/default-image.jpg', {
+          destination: 'preview_images/' + url.replaceAll('/', '-') + ".jpg"
+        }).then(() => {
+          response.status(200);
+          response.send();
+          return;
+        }).catch((error) => {
+          response.status(400);
+          response.send();
+          return;
+        })
       }
       if (result.ogImage[0].url) {
         axios({
